@@ -1,0 +1,23 @@
+regcv <- function(y,data,h,ph)
+{ 
+# y: target variable to be predicted
+# data: input variables
+# ph: prediction horizon
+# n-h: minimum data length for fitting a model
+N <- length(y)
+se<-matrix(NA,h-ph+1,ph)
+sem<-matrix(NA,h-ph+1,ph)
+data<-cbind(y,data)
+st <- (N-h-1)
+ 
+for(i in 1:(h-ph+1))
+{
+  train <- data[1:(st+i),]
+  test <- data[(st+i+1):(st+i+ph),]
+  fit<-lm(y~.,data=train)
+  fcast<-predict(fit,test)
+  se[i,1:ph] <- (fcast-test[,1])^2
+  sem[i,1:ph]<- (mean(train[,1])-test[,1])^2
+}
+return(colSums(se,na.rm=T)/colSums(sem,na.rm=T)) 
+}
