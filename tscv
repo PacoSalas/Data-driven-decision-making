@@ -1,0 +1,21 @@
+tscv <- function(y,h,ph)
+{ 
+# y: target variable to be predicted
+# ph: prediction horizon
+# N-h: minimum data length for fitting a model
+N <- length(y)
+se<-matrix(NA,h-ph+1,ph)
+sem<-matrix(NA,h-ph+1,ph)
+st <- (N-h-1)
+ 
+for(i in 1:(h-ph+1))
+{
+  train <- y[1:(st+i)]
+  test <- y[(st+i+1):(st+i+ph)]
+  fit<-ar(train)
+  fcast<-predict(fit,n.ahead=ph)$pred
+  se[i,1:ph] <- (fcast-test)^2
+  sem[i,1:ph]<- (mean(train)-test)^2
+}
+return(colSums(se,na.rm=T)/colSums(sem,na.rm=T)) 
+}
